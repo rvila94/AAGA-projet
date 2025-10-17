@@ -44,18 +44,22 @@ def curveball(M):
     res=M
     taille_ligne=len(res)
     #Etape 1 : obtenir 2 listes aléatoires dans la matrice 
-    i_1,i_2=generate_2(taille_ligne)
-    print("index de l1 = "+str(i_1))
-    print("index de l2 = "+str(i_2))
-    l1=M[i_1]
-    l2=M[i_2]
+    l1=[]
+    l2=[]
+    while len(l1)==0 or len(l2)==0:
+        i_1,i_2=generate_2(taille_ligne)
+        l1=M[i_1]
+        l2=M[i_2]
     #Etape 2 : on prive de ces 2 listes les occurrences d'index qui donnent tout les 2 un élément différent de 0 dans les listes
     L1,L2=no_equal(l1,l2)
+    # Si L1 ou L2 sont vides, on ne peut pas faire d'échange
+    if len(L1) == 0 or len(L2) == 0:
+        return res
     #Etape 3 : on échange un élément d'une des listes obtenus dans l'étape 2 
     x=random.randint(0,len(L1)-1)
     y=random.randint(0,len(L2)-1)
-    print("valeur de L1 qui va être échangé : "+str(L1[x]))
-    print("valeur de L2 qui va être échangé : "+str(L2[y]))
+    print("valeur de L1 qui va être échangé : "+str(L1[x]), 'i_1 = ', i_1)
+    print("valeur de L2 qui va être échangé : "+str(L2[y]), 'i_2 = ', i_2)
     del1=L1[x] #ancienne valeur qui va devoir être mis à 0 lors de la mise à jour de la liste 
     del2=L2[y] #same
     #échange
@@ -70,10 +74,5 @@ def curveball(M):
     res[i_1]=l1
     res[i_2]=l2
     return res 
-
-print(matrice_essai)
-print("----------")
-new_m=curveball(matrice_essai)
-print(new_m)
 
 
