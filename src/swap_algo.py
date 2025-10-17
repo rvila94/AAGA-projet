@@ -2,7 +2,7 @@ import random
 import networkx as nx
 from copy import deepcopy
 
-def swap_randomization(G, num_trials=1000, copy_graph=True, trace=False):
+def swap_randomization(G, num_trials=1000, copy_graph=True, verbose=False):
     """
     Perform edge swaps based on Miklós & Podani trial-swap algorithm 
     Preserves degree sequence and graph simplicity
@@ -43,12 +43,12 @@ def swap_randomization(G, num_trials=1000, copy_graph=True, trace=False):
             n_swaps += 1
             edges = list(G.edges())
 
-            if trace:
+            if verbose:
                 print(f"Swap #{n_swaps}: {(a,b),(c,d)} → {new_edges}")
 
     print(f"\nNombre de swaps valides effectués : {n_swaps} / {num_trials}")
 
-    if trace:
+    if verbose:
         print("\nJournal des swaps :")
         for s in swap_log:
             print(f"  {s['old_edges']} → {s['new_edges']}")
