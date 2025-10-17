@@ -13,3 +13,6 @@ def plot_graph(G, title="Graoh"):
     plt.title(title)
     plt.show()
     
+def degree_sequence(G):
+    """Return degree sequence"""
+    return [d for _, d in G.degree()]
