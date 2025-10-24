@@ -27,8 +27,6 @@ def run_empirical(G, algo_func, factor=20, copy_graph=True, verbose=False):
 
     return new_G
 
-# Not done 
-# FIXME
 def run_until_stable(
     G,
     algo_func,
@@ -66,13 +64,13 @@ def run_until_stable(
 
     while n_trials < max_trials:
         # Effectuer un bloc d'itérations de l'algo choisi
-        G = algo_func(G, num_trials=batch_size, copy_graph=copy_graph)
+        new_G = algo_func(G, num_trials=batch_size, copy_graph=copy_graph)
         n_trials += batch_size
 
         # Mesure des trois indicateurs
-        triangles = sum(nx.triangles(G).values()) // 3
+        triangles = sum(nx.triangles(new_G).values()) // 3
         clustering = nx.average_clustering(G)
-        largest_component = len(max(nx.connected_components(G), key=len))
+        largest_component = len(max(nx.connected_components(new_G), key=len))
 
         history["triangles"].append(triangles)
         history["avg_clustering"].append(clustering)
@@ -80,7 +78,7 @@ def run_until_stable(
 
         if verbose:
             print(
-                f"Après {n_trials:6d} itérations → "
+                f"Après {n_trials:6d} itérations -> "
                 f"triangles={triangles}, "
                 f"clust={clustering:.4f}, "
                 f"LCC={largest_component}"
@@ -88,7 +86,7 @@ def run_until_stable(
 
         # Vérifie la stabilisation sur la fenêtre glissante
         stable_all = True
-        for key, values in history.items():
+        for _, values in history.items():
             if len(values) < window:
                 stable_all = False
                 break
@@ -116,4 +114,4 @@ def run_until_stable(
     if not stable_all and verbose:
         print("\nAucune convergence détectée avant max_trials atteint.")
 
-    return G, history, n_trials
+    return new_G, history, n_trials
