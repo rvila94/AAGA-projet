@@ -1,4 +1,5 @@
 import random
+import numpy as np
 import networkx as nx
 from copy import deepcopy
 
@@ -13,7 +14,7 @@ def swap_randomization(G, num_trials=1000, copy_graph=True, verbose=False):
 
     edges = list(G.edges())
     n_swaps = 0
-    swap_log = []
+    swap_history = []
 
     for _ in range(num_trials):
         # Sélection aléatoire de deux arêtes
@@ -35,7 +36,7 @@ def swap_randomization(G, num_trials=1000, copy_graph=True, verbose=False):
             G.add_edges_from(new_edges)
 
             # Enregistre le swap effectué pour vérification
-            swap_log.append({
+            swap_history.append({
                 "old_edges": [(a, b), (c, d)],
                 "new_edges": new_edges
             })
@@ -50,7 +51,7 @@ def swap_randomization(G, num_trials=1000, copy_graph=True, verbose=False):
 
     if verbose:
         print("\nJournal des swaps :")
-        for s in swap_log:
+        for s in swap_history:
             print(f"  {s['old_edges']} → {s['new_edges']}")
 
     return G
