@@ -1,30 +1,26 @@
 from graph_utils import generate_graph, plot_graph, degree_sequence
 from swap_algo import swap_randomization
+from trade_algo import curveball
 from convergence import run_empirical, run_until_stable
 import networkx as nx
 
-from trade_algo import curveball
-
 def main():
-
+    
+    # Generation de graphe aleatoire, 
+    # par la suite on pourra faire des tests sur des graphes specifique qu'on aura trouver ou generer nous meme
     G = generate_graph()
-    M = nx.to_numpy_array(G)
-    #plot_graph(G)
 
-    new_G_swap = run_empirical(G, swap_randomization, verbose=True)
-    print("Matrice avant trade :")
-    print(M)
-    adj_matrix_trade = curveball(M)
-    print("Matrice après trade :")
-    print(adj_matrix_trade)
-    new_G_trade = nx.from_numpy_array(adj_matrix_trade, create_using=nx.DiGraph)
+    # Lancement des algos swap et trade jusqu'a stabilisation des indicateurs 
+    new_G_swap, history, n_trials = run_until_stable(G, swap_randomization, verbose=True)
+    # TODO: lancer ici run_until_stable avec l'algo de trade quand implementé
 
-    plot_graph(G, new_G_swap)
-    plot_graph(G, new_G_trade)
-
+    # Check piur voir si la sequence de degrée est toujours la meme
     deg_before = degree_sequence(G)
-    deg_after  = degree_sequence(new_G_swap)
-    assert sorted(deg_before) == sorted(deg_after), "Erreur: Séquence de degrés modifiée !"
+
+    deg_after_swap  = degree_sequence(new_G_swap)
+    assert sorted(deg_before) == sorted(deg_after_swap), "Erreur: Séquence de degrés modifiée lors de l'algorithme swap!"
+    # TODO: faire le meme assert pour l'algo de trade 
+
 
 if __name__ == "__main__":
     main()
