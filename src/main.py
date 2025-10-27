@@ -1,6 +1,6 @@
 from graph_utils import generate_graph, plot_graph, degree_sequence
 from swap_algo import swap_randomization
-from trade_algo import curveball
+from trade_algo import curveball, undirected_curveball
 from convergence import run_empirical, run_until_stable
 import networkx as nx
 
@@ -65,7 +65,7 @@ def main():
     G = generate_graph(5,7)
 
     # Lancer le test sur l'algorithme de swap
-    test_randomization_convergence(G, swap_randomization)
+    test_randomization_convergence(G, undirected_curveball)
 
 if __name__ == "__main__":
     main()

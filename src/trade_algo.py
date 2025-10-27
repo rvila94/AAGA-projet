@@ -104,6 +104,8 @@ def undirected_curveball(G, num_trials=1000, copy_graph=True, verbose=False):
     if copy_graph:
         G = deepcopy(G)
     
+    n_trades = 0
+
     for _ in range(num_trials):
 
         # (1)
@@ -129,6 +131,11 @@ def undirected_curveball(G, num_trials=1000, copy_graph=True, verbose=False):
         Bj = Aj - Ai_j
         for iterateur in range(len(L_2)):
             Bj.add(L_2[iterateur])
+        
+        if (len(Ai)!=len(Bi) or len(Aj)!=len(Bj)) :
+            continue
+
+        n_trades+=1
         
         suppr_i = Ai - Bi # lien du noeud i à ses voisin à supprimer dans le graphe 
         suppr_j = Aj - Bj # même chose pour j
@@ -162,6 +169,8 @@ def undirected_curveball(G, num_trials=1000, copy_graph=True, verbose=False):
                 if v==i :
                     G.remove_edges_from([(val,v)])
                     G.add_edges_from([(val,j)])
+
+    print(f"\nNombre de trades valides effectués : {n_trades} / {num_trials}")
 
     return G
 
