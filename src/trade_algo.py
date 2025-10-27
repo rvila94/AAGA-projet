@@ -88,60 +88,80 @@ def curveball(M):
     res[i_2]=l2
     return res 
 
-#Algorithme des trades sur 1 itération 
-def iterate_trades(M,verbose=False): # renvoie false si le trading a échoué, true sinon 
-    res=M
-    taille_ligne=len(res)
-    #Etape 1 : obtenir 2 listes aléatoires dans la matrice 
-    l1=[]
-    l2=[]
-    while len(l1)==0 or len(l2)==0:
-        i_1,i_2=generate_2(taille_ligne)
-        l1=M[i_1]
-        l2=M[i_2]
-    #On enlève le potentiel lien direct entre les 2 points du graphe 
-    L1,L2=no_link(l1,l2,i_1,i_2)
-    # Si L1 ou L2 sont vides, on ne peut pas faire d'échange
-    if len(L1) == 0 or len(L2) == 0:
-        return res,False
-    numb_trades=min(len(L1),len(L2))
-    for i in range(numb_trades):
-        x=random.randint(0,len(L1)-1)
-        y=random.randint(0,len(L2)-1)
-        if(verbose):
-            print("valeur de L1 qui va être échangé : "+str(L1[x]), 'i_1 = ', i_1)
-            print("valeur de L2 qui va être échangé : "+str(L2[y]), 'i_2 = ', i_2)
-        del1=L1[x] #ancienne valeur qui va devoir être mis à 0 lors de la mise à jour de la liste 
-        del2=L2[y] #same
-        #échange
-        tmp=L2[y]
-        L2[y]=L1[x]
-        L1[x]=tmp
-        #changement sur la matrice principal
-        l1[del1]=0
-        l2[del2]=0
-        l1[L1[x]]=1
-        l2[L2[y]]=1
-        res[i_1]=l1
-        res[i_2]=l2
+
+"""
+    Algorithme du undirected curveball (variante du curveball fait pour les graphes non orienté)
+    (1) On choisi aléatoirement 2 ensemble de voisin de i et j (des points du graphe) Ai et Aj
+    (2) On crée les ensembles Ai-j et Aj-i tel que Ai-j = Ai\ (Aj U {j}) , Aj-i = Aj \ (Ai U {i})
+    (3) On crée un nouveau ensemble Bi en retirant Ai-j de Ai et en ajoutant le même nombre d'éléments choisi aléatoirement de Ai-j U Aj-i.
+    Combine Aj \ Aj-i avec le reste des éléments de Ai-j U Aj-i pour former Bj.
+    (3') Pour chaque index k dans Bi \ Ai remplace j par i dans Bk. De même manière, pour chaque l dans Bj \ Aj, remplace i par j dans Bl 
+    (4) On itère les étapes (1) à (3') N fois pour un N fixé 
+"""
+
+def undirected_curveball(G, num_trials=1000, copy_graph=True, verbose=False):
     
-    return res,True
-
-def trades_randomization(G, num_trials=1000, copy_graph=True, verbose=False):
-
     if copy_graph:
         G = deepcopy(G)
-
-    M=nx.to_numpy_array(G)
-    n_trades = 0
-    trades_log = []
-
-    for _ in range(num_trials):
-      M,has_echange=iterate_trades(M,verbose)
-      if(has_echange):
-          n_trades+=1
-
-
-    return nx.from_numpy_array(M)
     
+    for _ in range(num_trials):
+
+        # (1)
+        index=list(G)
+        i,j=generate_2(len(index))
+        Ai= set([n for n in G.neighbors(i)]) 
+        Aj= set([n for n in G.neighbors(j)])
+
+        #(2)
+        Ai_j = Ai - Aj.union({j}) # Ai-j
+        Aj_i = Aj - Ai.union({i}) # Aj-i
+
+        #(3)
+        U_2 = Ai_j.union(Aj_i) # Ai-j U Aj-i
+        L_2 = list(U_2)
+        Bi = Ai - Ai_j 
+        n1= len(Ai) - len(Bi) # nombre d'éléments retiré 
+        for iterateur in range(n1):
+            rem = random.randint(0,len(L_2)-1)
+            Bi.add(L_2[rem]) #ajout d'élément de manière aléatoire dans Bi
+            L_2.pop(rem)
+
+        Bj = Aj - Ai_j
+        for iterateur in range(len(L_2)):
+            Bj.add(L_2[iterateur])
+        
+        suppr_i = Ai - Bi # lien du noeud i à ses voisin à supprimer dans le graphe 
+        suppr_j = Aj - Bj # même chose pour j
+
+        for val in suppr_i:
+            G.remove_edges_from([(i,val)])
+        for val in suppr_j:
+            G.remove_edges_from([(j,val)])
+
+        ajout_i = Bi - Ai # lien à rajouter dans le graphe 
+        ajout_j = Bj - Aj # même chose pour j
+
+        for val in ajout_i:
+            G.add_edges_from([(i,val)])
+        for val in ajout_j:
+            G.add_edges_from([(j,val)])
+
+        #(3')
+        list_index_k= Bi - Ai 
+        for val in list_index_k :
+            voisin = [n for n in G.neighbors(val)]
+            for v in voisin :
+                if v==j :
+                    G.remove_edges_from([(val,v)])
+                    G.add_edges_from([(val,i)])
+
+        list_index_l= Bi - Ai 
+        for val in list_index_l :
+            voisin = [n for n in G.neighbors(val)]
+            for v in voisin :
+                if v==i :
+                    G.remove_edges_from([(val,v)])
+                    G.add_edges_from([(val,j)])
+
+    return G
 
