@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import networkx as nx
 import random
 
-def generate_graph(n=10, m=15):
+def generate_graph(n=5, m=7):
     """Generates a random graph with n nodes and m edges"""
     # complete_bipartite_graph(n1, n2[, create_using]) Returns the complete bipartite graph K_{n_1,n_2}.
     G = nx.gnm_random_graph(n, m, directed=False)
@@ -25,3 +25,5 @@ def plot_graph(G, new_G, title="Graph"):
 def degree_sequence(G):
     """Return degree sequence"""
     return [d for _, d in G.degree()]
+
+    

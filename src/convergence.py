@@ -31,7 +31,7 @@ def run_until_stable(
     G,
     algo_func,
     batch_size=200,
-    max_trials=200000,
+    max_trials=1000000,
     window=6,
     tol_rel=1e-3,
     copy_graph=True,
@@ -69,7 +69,7 @@ def run_until_stable(
 
         # Mesure des trois indicateurs
         triangles = sum(nx.triangles(new_G).values()) // 3
-        clustering = nx.average_clustering(G)
+        clustering = nx.average_clustering(new_G)
         largest_component = len(max(nx.connected_components(new_G), key=len))
 
         history["triangles"].append(triangles)
