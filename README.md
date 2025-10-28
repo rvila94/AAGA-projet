@@ -49,8 +49,9 @@ Regroupe les fonctions d'évaluation de la convergence des algorithmes de random
 `run_empirical(G, algo_func, factor, copy_graph, verbose)` :  
 Méthode de convergence empirique, inspirée de Miklós & Podani (2004).
 
-Elle fixe un nombre de tentatives proportionnel au nombre d'arêtes :  
-"We suggest that the number of trials should be set such that the expected number of swaps equals twice the number of 1's in the matrix"
+Elle fixe un nombre de tentatives proportionnel au nombre d'arêtes :
+
+> "We suggest that the number of trials should be set such that the expected number of swaps equals twice the number of 1's in the matrix"
 
 **Paramètres :**
 
