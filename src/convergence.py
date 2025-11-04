@@ -32,9 +32,9 @@ def run_until_stable(
     algo_func,
     batch_size=200,
     max_trials=1000000,
-    window=6,
-    tol_rel=1e-3,
-    copy_graph=True,
+    window=15,
+    tol_rel=1e-2,
+    copy_graph=False,
     verbose=True,
 ):
     """
@@ -64,13 +64,13 @@ def run_until_stable(
 
     while n_trials < max_trials:
         # Effectuer un bloc d'itérations de l'algo choisi
-        new_G = algo_func(G, num_trials=batch_size, copy_graph=copy_graph)
+        G = algo_func(G, num_trials=batch_size, copy_graph=copy_graph)
         n_trials += batch_size
 
         # Mesure des trois indicateurs
-        triangles = sum(nx.triangles(new_G).values()) // 3
-        clustering = nx.average_clustering(new_G)
-        largest_component = len(max(nx.connected_components(new_G), key=len))
+        triangles = sum(nx.triangles(G).values()) // 3
+        clustering = nx.average_clustering(G)
+        largest_component = len(max(nx.connected_components(G), key=len))
 
         history["triangles"].append(triangles)
         history["avg_clustering"].append(clustering)
@@ -114,4 +114,4 @@ def run_until_stable(
     if not stable_all and verbose:
         print("\nAucune convergence détectée avant max_trials atteint.")
 
-    return new_G, history, n_trials
+    return G, history, n_trials

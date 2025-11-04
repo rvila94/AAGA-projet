@@ -70,16 +70,16 @@ def generate_test_graphs():
     graphs = []
 
     # 1. Petit graphe pour tester le bon fonctionnement, pas utile pour comparer les deux algorithmes
-    graphs.append(("SmallExampleGraph (n=5, m=7)", generate_graph(5, 7)))
+    #graphs.append(("SmallExampleGraph (n=5, m=7)", generate_graph(5, 7)))
 
     # 2. Graph aléatoire avec n=20 et m=30
-    graphs.append(("Random graph (n=20, m=30)", generate_graph(20, 30)))
+    #graphs.append(("Random graph (n=20, m=30)", generate_graph(20, 30)))
 
     # 3. Erdos–Renyi n=100 p=0.05 (exemple)
     graphs.append(("Erdos-Renyi (n=100, p=0.05)", nx.erdos_renyi_graph(100, 0.05, seed=0)))
 
     # 4. quatrieme graphe à tester
-
+    #graphs.append(("Random graph (n=100, m=100)", generate_graph(100, 100)))
 
     # 5. cinquieme graphe à tester etc...
     

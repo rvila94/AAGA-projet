@@ -121,16 +121,9 @@ def undirected_curveball(G, num_trials=1000, copy_graph=True, verbose=False):
         #(3)
         U_2 = Ai_j.union(Aj_i) # Ai-j U Aj-i
         L_2 = list(U_2)
-        Bi = Ai - Ai_j 
-        n1= len(Ai) - len(Bi) # nombre d'éléments retiré 
-        for iterateur in range(n1):
-            rem = random.randint(0,len(L_2)-1)
-            Bi.add(L_2[rem]) #ajout d'élément de manière aléatoire dans Bi
-            L_2.pop(rem)
-
-        Bj = Aj - Ai_j
-        for iterateur in range(len(L_2)):
-            Bj.add(L_2[iterateur])
+        R = set(random.sample(L_2, len(Ai_j)))
+        Bi = (Ai - Ai_j).union(R)
+        Bj = (Aj - Aj_i).union(U_2 - R)
         
         if (len(Ai)!=len(Bi) or len(Aj)!=len(Bj)) :
             continue
@@ -154,21 +147,16 @@ def undirected_curveball(G, num_trials=1000, copy_graph=True, verbose=False):
             G.add_edges_from([(j,val)])
 
         #(3')
-        list_index_k= Bi - Ai 
-        for val in list_index_k :
-            voisin = [n for n in G.neighbors(val)]
-            for v in voisin :
-                if v==j :
-                    G.remove_edges_from([(val,v)])
-                    G.add_edges_from([(val,i)])
+        for k in (Bi - Ai):
+            if G.has_edge(k, j):
+                G.remove_edge(k, j)
+                G.add_edge(k, i)
 
-        list_index_l= Bi - Ai 
-        for val in list_index_l :
-            voisin = [n for n in G.neighbors(val)]
-            for v in voisin :
-                if v==i :
-                    G.remove_edges_from([(val,v)])
-                    G.add_edges_from([(val,j)])
+        for l in (Bj - Aj):
+            if G.has_edge(l, i):
+                G.remove_edge(l, i)
+                G.add_edge(l, j)
+
 
     if (verbose):
         print(f"\nNombre de trades valides effectués : {n_trades} / {num_trials}")
