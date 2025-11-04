@@ -30,10 +30,10 @@ def run_empirical(G, algo_func, factor=20, copy_graph=True, verbose=False):
 def run_until_stable(
     G,
     algo_func,
-    batch_size=200,
-    max_trials=1000000,
-    window=15,
-    tol_rel=1e-2,
+    batch_size=500,
+    max_trials=100000,
+    window=20,
+    tol_rel=1e-1,
     copy_graph=False,
     verbose=True,
 ):
