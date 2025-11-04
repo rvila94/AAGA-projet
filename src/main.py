@@ -1,11 +1,12 @@
+import networkx as nx
+import numpy as np
+import time
+import argparse
+
 from graph_utils import generate_graph, plot_graph, degree_sequence, plot_convergence, plot_convergence_tail
 from swap_algo import swap_randomization
 from trade_algo import curveball, undirected_curveball
 from convergence import run_empirical, run_until_stable
-import networkx as nx
-import numpy as np
-import time
-
 
 def test_randomization_convergence(
     G,
@@ -53,8 +54,8 @@ def test_randomization_convergence(
 
     # --- Si activé, affichage visualisation graphique  ---
     if plot:
-        plot_convergence(history, title="Convergence des indicateurs")
-        plot_convergence_tail(history, k=100, title="Zoom sur la convergence des indicateurs")
+        plot_convergence(history, title="Convergence des indicateurs - " + algo_name)
+        plot_convergence_tail(history, k=50, title="Zoom sur la convergence des indicateurs - " + algo_name)
 
     if verbose:
         print(f"=== Test terminé ===\n")
@@ -74,14 +75,13 @@ def generate_test_graphs():
     # 2. Graph aléatoire avec n=20 et m=30
     graphs.append(("Random graph (n=20, m=30)", generate_graph(20, 30)))
 
-
-    # 2. Erdos–Renyi n=100 p=0.05 (exemple)
+    # 3. Erdos–Renyi n=100 p=0.05 (exemple)
     graphs.append(("Erdos-Renyi (n=100, p=0.05)", nx.erdos_renyi_graph(100, 0.05, seed=0)))
 
-    # 3. troisieme graphe à tester
+    # 4. quatrieme graphe à tester
 
 
-    # 4. quatrieme graphe à tester etc...
+    # 5. cinquieme graphe à tester etc...
     
 
     return graphs
@@ -137,24 +137,31 @@ def compare_algorithms_on_graph(G, algo_funcs, runs=5, verbose=False, plot=False
 
 
 def main():
-    # --- Liste des algorithmes à comparer ---
-    algo_funcs = [swap_randomization, undirected_curveball]
+    parser = argparse.ArgumentParser(description="Swap vs Trade — random graph experiments")
 
-    # --- Liste des graphes à tester ---
+    parser.add_argument("--runs", type=int, default=5, help="Nombre de répétitions par algorithme")
+    parser.add_argument("--verbose", action="store_true", help="Affiche les détails des algorithmes")
+    parser.add_argument("--plot", action="store_true", help="Affiche les graphiques de convergence")
+
+    args = parser.parse_args()
+
+    runs = args.runs
+    verbose = args.verbose
+    plot = args.plot
+
+    algo_funcs = [swap_randomization, undirected_curveball]
     graph_list = generate_test_graphs()
 
-    # --- Nombre de répétitions par graphe ---
-    R = 5
-
-    # --- Comparaison pour chaque graphe ---
     for graph_name, G in graph_list:
         print("\n" + "="*60)
         print(f"   TEST : {graph_name}")
         print("="*60)
 
-        results = compare_algorithms_on_graph(G, algo_funcs, runs=R, verbose=False, plot=False)
+        results = compare_algorithms_on_graph(
+            G, algo_funcs, runs=runs, verbose=verbose, plot=plot
+        )
 
-        # --- Affichage des résultats ---
+        # Toujours afficher le résumé final (verbose ou pas)
         for r in results:
             print(f"\nAlgorithme : {r['algorithm']}")
             print(f"  Temps moyen d'exécution : {r['avg_execution_time']:.4f}s ± {r['std_execution_time']:.4f}")

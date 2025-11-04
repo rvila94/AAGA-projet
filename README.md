@@ -16,6 +16,7 @@ src/
 ### `graph_util.py`
 
 Regroupe des fonctions utilitaires utilisées dans tout le projet, telles que `degree_sequence(G)` qui retourne la séquence des degrés du graphe G sous forme de liste.
+Mais aussi les fonctions qui nous servent de visualiser la convergence des indicateurs: `plot_convergence(history, title)` et `plot_convergence_tail(history, k, title)`
 
 Ce fichier a un rôle de support et ne contient pas de logique algorithmique principale.
 
@@ -88,8 +89,80 @@ Après chaque bloc (`batch_size`) d'itérations :
 - `window` : taille de la fenêtre d'observation
 - `tol_rel` : tolérance relative pour juger la stabilisation
 
+---
+
 ### `main.py`
 
 Ce fichier constitue le point d'entrée du projet.
+Il orchestre l’exécution, la comparaison et l’analyse de la convergence des deux algorithmes :
+swap_randomization et undirected_curveball (trade).
+<br>
 
-<!-- TODO: à compléter quand le projet sera fini -->
+**Rôle général**:
+
+- Génère différents graphes de test.
+- Applique les algorithmes de randomisation sur chaque graphe.
+- Mesure la convergence selon plusieurs indicateurs structurels.
+- Compare les performances (temps, stabilité, nombre d’itérations).
+- Peut afficher des graphiques de convergence pour une analyse visuelle.
+  <br><br>
+
+**Fonctionnement principal**:  
+L’exécution se fait via la fonction `main()`, qui:
+
+1. Lit les arguments de ligne de commande
+
+   - `--runs R` : avec R le nombre de répétitions indépendantes de chaque algorithme (par défaut 5).
+   - `--verbose` : active l’affichage détaillé du déroulement
+   - `--plot` : active les graphiques de convergence pour visualiser graphiquement
+   - `--h` ou `--help` : affiche le message d'aide avec les options disponibles
+
+2. Sélectionne la liste d’algorithmes à comparer (`swap_randomization`, `undirected_curveball`)
+
+3. Génère plusieurs graphes de test via `generate_test_graphs()`
+
+4. Exécute chaque algorithme plusieurs fois sur chaque graphe
+   (nombre défini par `--runs`)
+
+5. Affiche un résumé clair et comparatif pour chaque graphe testé.
+   <br><br>
+
+**Exemples d’utilisation**:
+
+Exécution simple:
+
+```bash
+python main.py
+```
+
+<br>
+
+Exécution avec 10 répétitions:
+
+```bash
+python main.py --runs 10
+```
+
+<br>
+
+Exécution avec affichage des graphiques de convergence:
+
+```bash
+python main.py --plot
+```
+
+<br>
+
+Exécution en mode verbeux (affiche les détails de chaque itération):
+
+```bash
+python main.py --verbose
+```
+
+<br>
+
+Exécution complète (tout activé) :
+
+```bash
+python main.py --runs 10 --verbose --plot
+```
