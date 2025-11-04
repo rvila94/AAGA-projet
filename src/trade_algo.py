@@ -170,7 +170,8 @@ def undirected_curveball(G, num_trials=1000, copy_graph=True, verbose=False):
                     G.remove_edges_from([(val,v)])
                     G.add_edges_from([(val,j)])
 
-    print(f"\nNombre de trades valides effectués : {n_trades} / {num_trials}")
+    if (verbose):
+        print(f"\nNombre de trades valides effectués : {n_trades} / {num_trials}")
 
     return G
 

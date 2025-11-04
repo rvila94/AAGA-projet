@@ -1,4 +1,4 @@
-from graph_utils import generate_graph, plot_graph, degree_sequence
+from graph_utils import generate_graph, plot_graph, degree_sequence, plot_convergence, plot_convergence_tail
 from swap_algo import swap_randomization
 from trade_algo import curveball, undirected_curveball
 from convergence import run_empirical, run_until_stable
@@ -53,66 +53,115 @@ def test_randomization_convergence(
 
     # --- Si activé, affichage visualisation graphique  ---
     if plot:
-        # TODO
-        print("TODO: visualisation graphique de la convergence des indicateurs ")
+        plot_convergence(history, title="Convergence des indicateurs")
+        plot_convergence_tail(history, k=100, title="Zoom sur la convergence des indicateurs")
 
     if verbose:
         print(f"=== Test terminé ===\n")
 
     return new_G, history, n_trials
 
-def main():
-    # Générer un graphe simple non orienté
-    n=100
-    m=500
-    G = generate_graph(n, m)
+def generate_test_graphs():
+    """
+    Génère une liste de graphes à tester.
+    Chaque graphe est donné avec un nom pour l'affichage.
+    """
+    graphs = []
 
-    A = nx.to_numpy_array(G)
+    # 1. Petit graphe pour tester le bon fonctionnement, pas utile pour comparer les deux algorithmes
+    graphs.append(("SmallExampleGraph (n=5, m=7)", generate_graph(5, 7)))
 
-    #np.savetxt("matrice_adjacence1.txt", A, delimiter=",", fmt="%d") #Pour générer un fichier avec la matrice du graphe 
+    # 2. Graph aléatoire avec n=20 et m=30
+    graphs.append(("Random graph (n=20, m=30)", generate_graph(20, 30)))
 
-    # Liste des algorithmes à comparer
-    algorithms = [undirected_curveball,swap_randomization]
 
+    # 2. Erdos–Renyi n=100 p=0.05 (exemple)
+    graphs.append(("Erdos-Renyi (n=100, p=0.05)", nx.erdos_renyi_graph(100, 0.05, seed=0)))
+
+    # 3. troisieme graphe à tester
+
+
+    # 4. quatrieme graphe à tester etc...
+    
+
+    return graphs
+
+def compare_algorithms_on_graph(G, algo_funcs, runs=5, verbose=False, plot=False):
+    """
+    Exécute les algorithmes sur un graph donné, plusieurs fois,
+    puis renvoie les statistiques moyennes.
+    """
     results = []
 
-    for algo in algorithms:
-        start_time = time.time()
-        new_G, history, n_trials = test_randomization_convergence(G, algo, verbose=False)
-        end_time = time.time()
+    for algo in algo_funcs:
+        algo_name = "Swap" if algo.__name__ == "swap_randomization" else "Trade"
 
-        ls_triangle = history["triangles"]
-        ls_clust = history["avg_clustering"]
-        ls_comp = history["largest_component"]
+        exec_times = []
+        conv_iters = []
+        triangles = []
+        clusts = []
+        comps = []
 
-        """print("aaaaaaaa")
-        print(history["triangles"])
-        print("bbbbbbbbbb")"""
+        for i in range(runs):
+            print(f"Starting {algo_name} algorithm (run = {i})")
+            start = time.time()
+            new_G, history, n_trials = test_randomization_convergence(
+                G,
+                algo,
+                verbose=verbose,
+                plot=plot
+            )
+            end = time.time()
 
-        algo_name = ""
-        if algo.__name__ == "swap_randomization" :
-            algo_name = "Swap"
-        else:
-            algo_name ="Trades"
-        # Enregistrer les résultats
+            exec_times.append(end - start)
+            conv_iters.append(n_trials)
+            triangles.append(history["triangles"][-1])
+            clusts.append(history["avg_clustering"][-1])
+            comps.append(history["largest_component"][-1])
+
+        # Moyennes des runs
         results.append({
             "algorithm": algo_name,
-            "execution_time": end_time - start_time,
-            "num_triangles": ls_triangle[-1],
-            "average_clustering":ls_clust[-1],
-            "largest_connected_component" : ls_comp[-1],
-            "convergence_iterations": n_trials
+            "avg_execution_time": np.mean(exec_times),
+            "std_execution_time": np.std(exec_times),
+
+            "avg_convergence_iterations": np.mean(conv_iters),
+            "std_convergence_iterations": np.std(conv_iters),
+
+            "avg_triangles": np.mean(triangles),
+            "avg_clustering": np.mean(clusts),
+            "avg_lcc": np.mean(comps),
         })
 
-    # Afficher les résultats
-    print(f"\n=== Comparaison des algorithmes pour un graphe avec {n} noeuds et {m} arrêtes ===")
-    for result in results:
-        print(f"Algorithme: {result['algorithm']}")
-        print(f"  Temps d'exécution: {result['execution_time']:.4f} s")
-        print(f"  Nombre de triangles: {result['num_triangles']}")
-        print(f"  Coefficient de clustering: {result['average_clustering']}")
-        print(f"  Taille du plus grand composant connexe: {result['largest_connected_component']}")
-        print(f"  Itérations de convergence: {result['convergence_iterations']}")
+    return results
+
+
+def main():
+    # --- Liste des algorithmes à comparer ---
+    algo_funcs = [swap_randomization, undirected_curveball]
+
+    # --- Liste des graphes à tester ---
+    graph_list = generate_test_graphs()
+
+    # --- Nombre de répétitions par graphe ---
+    R = 5
+
+    # --- Comparaison pour chaque graphe ---
+    for graph_name, G in graph_list:
+        print("\n" + "="*60)
+        print(f"   TEST : {graph_name}")
+        print("="*60)
+
+        results = compare_algorithms_on_graph(G, algo_funcs, runs=R, verbose=False, plot=False)
+
+        # --- Affichage des résultats ---
+        for r in results:
+            print(f"\nAlgorithme : {r['algorithm']}")
+            print(f"  Temps moyen d'exécution : {r['avg_execution_time']:.4f}s ± {r['std_execution_time']:.4f}")
+            print(f"  Itérations de convergence : {r['avg_convergence_iterations']:.1f} ± {r['std_convergence_iterations']:.1f}")
+            print(f"  Nombre moyen de triangles : {r['avg_triangles']:.1f}")
+            print(f"  Clustering moyen : {r['avg_clustering']:.4f}")
+            print(f"  Taille du LCC : {r['avg_lcc']:.1f}")
         
         
 

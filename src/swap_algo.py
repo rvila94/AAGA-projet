@@ -46,10 +46,10 @@ def swap_randomization(G, num_trials=1000, copy_graph=True, verbose=False):
 
             if verbose:
                 print(f"Swap #{n_swaps}: {(a,b),(c,d)} → {new_edges}")
-
-    print(f"\nNombre de swaps valides effectués : {n_swaps} / {num_trials}")
+   
 
     if verbose:
+        print(f"\nNombre de swaps valides effectués : {n_swaps} / {num_trials}")
         print("\nJournal des swaps :")
         for s in swap_history:
             print(f"  {s['old_edges']} → {s['new_edges']}")
