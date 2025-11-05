@@ -3,7 +3,7 @@ import numpy as np
 import time
 import argparse
 
-from graph_utils import generate_graph, plot_graph, degree_sequence, plot_convergence, plot_convergence_tail
+from graph_utils import generate_graph, plot_graph, degree_sequence, plot_all_indicators
 from swap_algo import swap_randomization
 from trade_algo import curveball, undirected_curveball
 from convergence import run_empirical, run_until_stable
@@ -13,8 +13,8 @@ def test_randomization_convergence(
     algo_func,
     batch_size=500,
     max_trials=1_000_000,
-    window=10,
-    tol_rel=1e-1,
+    window=12,
+    tol_rel=0.1,
     copy_graph=True,
     verbose=True,
     plot=False,
@@ -54,9 +54,7 @@ def test_randomization_convergence(
 
     # --- Si activé, affichage visualisation graphique  ---
     if plot:
-        plot_convergence(history, title="Convergence des indicateurs - " + algo_name)
-        plot_convergence_tail(history, k=50, title="Zoom sur la convergence des indicateurs - " + algo_name)
-
+        plot_all_indicators(history, window, tol_rel, algo_name)
     if verbose:
         print(f"=== Test terminé ===\n")
 

@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import networkx as nx
+import numpy as np
 import random
 
 def generate_graph(n=5, m=7):
@@ -26,42 +27,59 @@ def degree_sequence(G):
     """Return degree sequence"""
     return [d for _, d in G.degree()]
 
-def plot_convergence(history, title="Convergence des indicateurs"):
+def plot_all_indicators(history, window, tol_rel, algo_name):
     """
-    Affiche les courbes de convergence pour :
-    - nombre de triangles
-    - clustering moyen
-    - taille de la plus grande composante connexe
-    """
-    plt.figure(figsize=(10, 6))
-    
-    for key, values in history.items():
-        plt.plot(values, label=key)
-    
-    plt.xlabel("Bloc d’itérations (x batch_size)")
-    plt.ylabel("Valeur de l’indicateur")
-    plt.title(title)
-    plt.legend()
-    plt.grid(True, alpha=0.3)
-    plt.tight_layout()
-    plt.show()
+    Affiche l’évolution de chaque indicateur avec un diagnostic de convergence basé
+    uniquement sur les `window` dernières valeurs observées.
 
+    Signification des lignes tracées :
+      - Bleu  : évolution brute de l’indicateur au cours des itérations.
+      - Rouge : moyenne des `window` derniers points -> estimation de l’état actuel stable.
+      - Orange: intervalle [moyenne ± écart-type] -> mesure de la variabilité récente.
+      - Vert  : bande de tolérance [moyenne ± tol_rel * moyenne] -> seuil de stabilisation attendu.
 
-def plot_convergence_tail(history, k=100, title="Zoom sur la convergence des indicateurs"):
+    Critère visuel de convergence :
+      -> L’indicateur est considéré comme stable lorsque ses variations récentes
+        (bande orange) restent entièrement **à l’intérieur** de la bande verte.
     """
-    Affiche uniquement les k DERNIERS points de chaque indicateur,
-    pour visualiser la convergence locale.
-    """
-    plt.figure(figsize=(10, 6))
-    
-    for key, values in history.items():
-        tail_values = values[-k:] if len(values) >= k else values
-        plt.plot(tail_values, label=key)
-    
-    plt.xlabel(f"Derniers blocs (fenêtre = {k})")
-    plt.ylabel("Valeur de l’indicateur")
-    plt.title(title)
-    plt.legend()
-    plt.grid(True, alpha=0.3)
-    plt.tight_layout()
+
+    indicators = {
+        "largest_component": "Taille de la plus grande composante connexe",
+        "avg_clustering": "Clustering moyen",
+        "triangles": "Nombre de triangles"
+    }
+
+    for key, label in indicators.items():
+        values = history[key]
+
+        plt.figure(figsize=(10, 6))
+        plt.plot(values, label=label, color="blue", alpha=0.7)
+
+        if len(values) >= window:
+            recent = np.array(values[-window:], dtype=float)
+            mean = recent.mean()
+            std = recent.std()
+            tol_range = tol_rel * mean
+
+            # Moyenne locale (rouge)
+            plt.axhline(mean, color="red", linestyle="--", linewidth=1.4,
+                        label=f"Moyenne locale (sur {window} derniers) = {mean:.3f}")
+
+            # Bande d’écart-type (orange)
+            plt.axhline(mean + std, color="orange", linestyle=":", linewidth=1.2,
+                        label=f"Moyenne ± écart-type (± {std:.3f})")
+            plt.axhline(mean - std, color="orange", linestyle=":")
+
+            # Bande de tolérance (vert)
+            plt.axhline(mean + tol_range, color="green", linestyle="--", linewidth=1.2,
+                        label=f"Limite de tolérance (± {tol_rel:.3f} × mean)")
+            plt.axhline(mean - tol_range, color="green", linestyle="--")
+
+        plt.xlabel("Bloc d’itérations (x batch_size)")
+        plt.ylabel(label)
+        plt.title(f"Convergence de {label} — {algo_name}")
+        plt.legend(loc="upper left")
+        plt.grid(True, alpha=0.4)
+        plt.tight_layout()
+
     plt.show()

@@ -13,23 +13,23 @@ def swap_randomization(G, num_trials=1000, copy_graph=True, verbose=False):
     if copy_graph:
         G = G.copy()
 
-    # Liste des arêtes (sera mise à jour localement)
+    # Liste des arêtes
     edges = list(G.edges())
-    edge_set = set(edges)      # pour les tests rapides
+    edge_set = set(edges)
 
     n_swaps = 0
     swap_history = []
 
     for _ in range(num_trials):
 
-        # Si moins de 2 arêtes → impossible de faire un swap
+        # Si moins de 2 arêtes alors impossible de faire un swap
         if len(edges) < 2:
             break
 
-        # Choisir 2 arêtes distinctes
+        # On choisit 2 arêtes distinctes
         (a, b), (c, d) = random.sample(edges, 2)
 
-        # Vérifie qu'elles ne partagent pas de sommet
+        # On vérifie qu'elles ne partagent pas de sommet
         if len({a, b, c, d}) < 4:
             continue
 
@@ -39,7 +39,7 @@ def swap_randomization(G, num_trials=1000, copy_graph=True, verbose=False):
         else:
             new_edges = [(a, c), (b, d)]
 
-        # Vérification de validité : pas de boucle, pas d’arête existante
+        # On vérifie la validité : pas de boucle, pas d’arête existante
         valid = True
         for u, v in new_edges:
             if u == v or (u, v) in edge_set or (v, u) in edge_set:
@@ -49,7 +49,7 @@ def swap_randomization(G, num_trials=1000, copy_graph=True, verbose=False):
         if not valid:
             continue
 
-        # --- APPLIQUER LE SWAP ---
+        # swap
         G.remove_edge(a, b)
         G.remove_edge(c, d)
         G.add_edges_from(new_edges)
@@ -69,7 +69,7 @@ def swap_randomization(G, num_trials=1000, copy_graph=True, verbose=False):
 
         # Historique du swap
         if verbose:
-            print(f"Swap #{n_swaps+1}: {(a,b),(c,d)} → {new_edges}")
+            print(f"Swap #{n_swaps+1}: {(a,b),(c,d)} -> {new_edges}")
 
         swap_history.append({
             "old_edges": [(a, b), (c, d)],
@@ -83,6 +83,6 @@ def swap_randomization(G, num_trials=1000, copy_graph=True, verbose=False):
         print(f"\nNombre de swaps valides effectués : {n_swaps} / {num_trials}")
         print("\nJournal des swaps :")
         for s in swap_history:
-            print(f"  {s['old_edges']} → {s['new_edges']}")
+            print(f"  {s['old_edges']} -> {s['new_edges']}")
 
     return G
