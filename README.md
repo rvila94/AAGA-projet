@@ -16,7 +16,7 @@ src/
 ### `graph_util.py`
 
 Regroupe des fonctions utilitaires utilisées dans tout le projet, telles que `degree_sequence(G)` qui retourne la séquence des degrés du graphe G sous forme de liste.
-Mais aussi les fonctions qui nous servent de visualiser la convergence des indicateurs: `plot_convergence(history, title)` et `plot_convergence_tail(history, k, title)`
+Mais aussi la fonction qui nous sert de visualiser la convergence des indicateurs: `plot_all_indicators(history, window, tol_rel, algo_name)`
 
 Ce fichier a un rôle de support et ne contient pas de logique algorithmique principale.
 
